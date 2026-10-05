@@ -26,10 +26,34 @@ class Medico(models.Model):
     numcolegiatura = models.CharField(max_length=50, unique=True)
 
 class Departamento(models.Model):
-    pass
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='departamentos')
+    nombre_departamento = models.CharField(max_length=100)
+    director_medico = models.OneToOneField(
+        Medico, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='departamento_dirigido'
+    )
 
 class FichaMedica(models.Model):
-    fechaHora = models.CharField(max_length=100)
-    estado = models.TextField()
-    diagnostico = models.CharField(max_length=300)
-    tratamiento = models.CharField(max_length=300)
+    ESTADO_CHOICES = [
+        ('AGENDADA', 'Agendada'),
+        ('EN_CURSO', 'En curso'),
+        ('FINALIZADA', 'Finalizada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+    
+    fecha_hora = models.DateTimeField()
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='AGENDADA')
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='fichas_atendidas')
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name='fichas_medicas')
+    
+    motivo_consulta = models.TextField()
+    alergias_registradas = models.TextField(blank=True, null=True)
+    diagnostico = models.TextField(blank=True, null=True)
+    tratamiento = models.TextField(blank=True, null=True)
+    medicamentos_recetados = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Ficha {self.id} - {self.paciente.nombre} con Dr. {self.medico.nombre}"
