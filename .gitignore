@@ -1,0 +1,27 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+tareas/tareas/__pycache__/
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+local_settings.py
+
+# Environments
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store   
