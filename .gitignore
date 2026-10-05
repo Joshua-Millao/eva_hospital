@@ -26,3 +26,6 @@ env/
 
 # OS
 .DS_Store   
+
+tareas/tareas/__pycache__/settings.cpython-312.pyc
+tareas/requirements.txt
