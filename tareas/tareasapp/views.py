@@ -1,11 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from .models import *
 
 # Create your views here.
 
 def inicio(request):
+    paciente_lista = Paciente.objects.all()
 
-    response_test = "HOLAAAAA"
+    return render(request, 'inicio.html', {
+        'pacientes' : len(paciente_lista)
+    })
 
-    return HttpResponse(response_test)
-    pass
+# ESTO TMBN ES TEMPORAL HRMNO
+# ASLKDNASLJD
