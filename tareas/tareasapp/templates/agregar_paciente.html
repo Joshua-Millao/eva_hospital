@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Agregar paciente</title>
+    </head>
+<body>
+    <div>
+        <h2> Agregar paciente </h2>
+        <hr/>
+    </div>
+    <div>
+        <form method="POST">
+            
+            {% csrf_token %}
+
+            Rut <br>
+            <input type="text" 
+            name="rut" maxlength="12" required> <br>
+
+            Nombre <br>
+            <input type="text" 
+            name="nombre" maxlength="100" required> <br>
+
+            Fecha de nacimiento <br>
+            <input type="date" 
+            name="fecha_nacim" required> <br>
+
+            Direccion <br>
+            <input type="text" 
+            name="direccion" maxlength="200" required> <br>
+
+            Telefono <br>
+            <input type="text" 
+            name="telefono" maxlength="20" required> <br>
+
+            Prevision <br>
+            <select name="prevision" >
+                <option value="fonasa a">Fonasa A</option>
+                <option value="fonasa b">Fonasa B</option>
+                <option value="isapre">Isapre</option>
+                <option value="ninguna">Ninguna</option>
+
+            </select> <br> <br>
+            <!-- <input type="text" name="prevision" required> -->
+            
+            <button type="submit">Guardar paciente</button>
+        </form>
+        <hr>
+    </div>
+    <div>
+        <form action="/">
+            <button> ↩ Volver al inicio</button>
+        </form>
+        <!-- <a href="/">Volver al inicio</a> -->
+    </div>
+</body>
+</html>
