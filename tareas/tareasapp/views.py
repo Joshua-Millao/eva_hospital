@@ -40,5 +40,10 @@ def detalle_paciente(request):
 def modificar_paciente(request):
     pass
 
+# def pagina_test(request):
+
+#     return render(request, 'test.html')
+#     pass
+
 # ESTO TMBN ES TEMPORAL HRMNO
 # ASLKDNASLJD
