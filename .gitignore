@@ -29,3 +29,5 @@ env/
 
 tareas/tareas/__pycache__/settings.cpython-312.pyc
 tareas/requirements.txt
+tareas/tareasapp/templates/test.html
+tareas\tareas\__pycache__\
