@@ -26,12 +26,12 @@
             <table>
                 <tr>
                     <td>
-                        <form action="">
+                        <form action="{% url 'detalle_paciente' paciente.id %}">
                             <button>👁️ Ver Mas</button>
                         </form>
                     </td>
                     <td>
-                        <form action="">
+                        <form action="{% url 'editar_paciente' paciente.id %}">
                             <button>✏️ Editar</button>
                         </form>
                     </td>
