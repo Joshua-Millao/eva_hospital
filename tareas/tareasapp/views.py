@@ -1,4 +1,5 @@
 from django.shortcuts import render,redirect, get_list_or_404
+from django.db import IntegrityError
 from .models import Paciente
 from .models import FichaMedica
 from .models import Medico
@@ -26,30 +27,41 @@ def inicio(request):
 
 # READ: Listar todos los registros
 def listar_paciente(request):
-    paciente = Paciente.objects.all()
-    return render(request, "listar_paciente.html", {"paciente" : paciente})
+    pacientes = Paciente.objects.all()
+    return render(request, "listar_paciente.html", {"pacientes" : pacientes})
 
 
 # CREATE: Formulario para agregar un nuevo paciente
 def crear_paciente(request):
+
+    rut_actual =  request.POST.get("rut")
+
     if request.method == "POST":
-        Paciente.objects.create(
-            rut = request.POST.get("rut"),
-            nombre = request.POST.get("nombre"),
-            fecha_nacimiento = request.POST.get("fecha_nacimiento"),
-            direccion = request.POST.get("direccion"),
-            telefono = request.POST.get("telefono"),
-            id_paciente =  request.POST.get("id_paciente"),
-            prevision =request.POST.get("prevision"),
-            grupo_sanguineo = request.POST.get("grupo_sanguineo")
-        )
-        return redirect("listar_paciente.html")
+
+        if Paciente.objects.filter(rut=rut_actual).exists() == False:
+            Paciente.objects.create(
+                rut = rut_actual,
+                nombre = request.POST.get("nombre"),
+                fecha_nacimiento = request.POST.get("fecha_nacim"),
+                direccion = request.POST.get("direccion"),
+                telefono = request.POST.get("telefono"),
+                # id_paciente =  request.POST.get("id_paciente"),
+                prevision =request.POST.get("prevision"),
+                # grupo_sanguineo = request.POST.get("grupo_sanguineo")
+            )
+            return redirect("listar_paciente")
+        else:
+            return render(request, "crear_paciente.html", {
+                'error_detectado' : 1
+            })
     
-    return render(request, "crear_paciente.html")
+    return render(request, "crear_paciente.html", {
+        'error_detectado' : 0
+    })
 
 
 # UPDATE: Formulario para editar un paciente ya existente
-def editar_paceinte(request):
+def editar_paciente(request):
     paciente = get_list_or_404(Paciente, id=id)
 
     if request.method == "POST":
@@ -62,7 +74,7 @@ def editar_paceinte(request):
         paciente.prevision = request.POST.get("prevision"),
         paciente.grupo_sanguineo = request.POST.get("grupo_sanguineo")
         paciente.save()
-        return redirect("listar_paciente.html")
+        return redirect("listar_paciente")
     return render(request, 'editar_paciente.html', {'paciente' : paciente})
 
 
@@ -73,7 +85,7 @@ def eliminar_paciente(request, id):
     if request.method == 'POST':
         paciente_eliminar.delete()
 
-        return redirect('inicio')
+        return redirect('listar_paciente')
 
     return render(request, 'eliminar_paciente.html', {
         'paciente': paciente_eliminar

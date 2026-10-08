@@ -11,10 +11,8 @@
     </div>
     <div>
         <div>
-            <h3>{{paciente.nombre}}</h3>
+            <b style="font-size:larger;">{{paciente.nombre}}</b>
             <p>{{paciente.rut}}</p>
-            <p>{{paciente.prevision}}</p>
-            <p>{{paciente.fecha_nacimiento}}</p>
         </div>
 
         <form method="POST">
@@ -26,7 +24,7 @@
         <hr>
     </div>
     <div>
-        <form action="/">
+        <form action="{% url 'listar_paciente'%}">
             <button>Cancelar</button>
         </form>
     </div>

@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Dashboard</title>
 </head>
 <body>
     <div>
-        <h3>Bienvenido!</h3>
+        <h2>Bienvenido!</h2>
         <hr>
     </div>
     <div>
-        Dashboard
+        <b>Dashboard</b>
         <br>
 
         <p>
@@ -21,11 +21,10 @@
             Fichas totales <br>
             {{ total_fichas }}
         </p>
-    </div>
-    <div>
         <form action="{% url 'listar_paciente' %}">
-            <button>Ver todos los pacientes</button>
+            <button><b style="font-size: large;">😷 Pacientes</b></button>
         </form>
+        <hr>
     </div>
 </body>
 </html>
