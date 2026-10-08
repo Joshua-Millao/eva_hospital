@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Menu de Inicio</title>
+        <!-- <link rel="stylesheet" href=""> -->
+    </head>
+<body>
+    <div>
+        <h2>Sistema de hospital</h2>
+        <hr/>
+    </div>
+    <div>
+        <form action="{% url 'crear_paciente' %}">
+            <button>➕ Añadir paciente</button>
+        </form>
+       
+        <hr>
+    </div>
+    <div>
+        {% for paciente in pacientes %}
+        <div>
+            <h3>{{paciente.nombre}}</h3>
+            <p>{{paciente.rut}}</p>
+            <p>{{paciente.prevision}}</p>
+            <p>{{paciente.fecha_nacimiento}}</p>
+            <form action="{% url 'eliminar_paciente' paciente.id %}">
+                <button>🧺</button>
+            </form>
+        </div>
+
+        {% empty %}
+         No hay pacientes registrados ❕
+
+        {% endfor %}
+
+        <hr>
+    </div>
+</body>
+</html>
