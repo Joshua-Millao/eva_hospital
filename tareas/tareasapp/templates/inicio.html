@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div>
+        <h2>Bienvenido!</h2>
+        <hr>
+    </div>
+    <div>
+        <b>Dashboard</b>
+        <br>
+
+        <p>
+            Pacientes totales: <br>
+            {{ total_pacientes }}
+        </p>
+        <p>
+            Fichas totales <br>
+            {{ total_fichas }}
+        </p>
+        <form action="{% url 'listar_paciente' %}">
+            <button><b style="font-size: large;">😷 Pacientes</b></button>
+        </form>
+        <hr>
+    </div>
+</body>
+</html>

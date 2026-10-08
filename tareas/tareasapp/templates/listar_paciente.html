@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Pacientes</title>
+        <!-- <link rel="stylesheet" href=""> -->
+    </head>
+<body>
+    <div>
+        <h2>Listado de pacientes</h2>
+        <hr/>
+    </div>
+    <div>
+        <form action="{% url 'crear_paciente' %}">
+            <button>➕ Añadir paciente</button>
+        </form>
+       
+        <hr>
+    </div>
+    <div>
+        {% for paciente in pacientes %}
+        <div style="border: 1px solid; width: 400px; padding: 8px; margin: 2px;">
+            <b style="font-size:larger;">{{paciente.nombre}}</b>
+            <p>RUT {{paciente.rut}}</p>
+            
+            <table>
+                <tr>
+                    <td>
+                        <form action="{% url 'detalle_paciente' paciente.id %}">
+                            <button>👁️ Ver Mas</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="{% url 'editar_paciente' paciente.id %}">
+                            <button>✏️ Editar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="{% url 'eliminar_paciente' paciente.id %}">
+                            <button>🗑️ Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            
+        </div>
+
+        {% empty %}
+         No hay pacientes registrados ❕
+
+        {% endfor %}
+
+        <hr>
+    </div>
+    <div>
+        <form action="/">
+            <button>↩ Volver al inicio</button>
+        </form>
+    </div>
+</body>
+</html>

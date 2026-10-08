@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Agregar paciente</title>
+        <style>
+            .error-cont
+            {
+                border: 1px solid #000000; 
+                background-color: rgb(255, 68, 55);
+                /* color: #fff; */
+                width: 400px;
+            }
+        </style>
+    </head>
+<body>
+    <div>
+        <h2> Agregar paciente </h2>
+        <hr/>
+    </div>
+    <div>
+        {% if error_detectado != 0%}
+        <div class="error-cont">
+            <b>
+                {% if error_detectado != 0%}
+                Se produjo un error: 
+                {% endif %}
+                
+                {% if error_detectado == 1 %}
+                <p> El rut esta repetido, Ingrese uno diferente</p>
+                {% endif %}
+            </b>
+        </div>
+       {% endif %}
+        <form method="POST">
+            
+            {% csrf_token %}
+
+            Rut <br>
+            <input type="text" 
+            name="rut" maxlength="12" required> <br>
+
+            Nombre <br>
+            <input type="text" 
+            name="nombre" maxlength="100" required> <br>
+
+            Fecha de nacimiento <br>
+            <input type="date" 
+            name="fecha_nacim" required> <br>
+
+            Direccion <br>
+            <input type="text" 
+            name="direccion" maxlength="200" required> <br>
+
+            Telefono <br>
+            <input type="text" 
+            name="telefono" maxlength="20" required> <br>
+
+            Prevision <br>
+            <select name="prevision" >
+                <option value="fonasa a">Fonasa A</option>
+                <option value="fonasa b">Fonasa B</option>
+                <option value="isapre">Isapre</option>
+                <option value="ninguna">Ninguna</option>
+            </select> <br> <br>
+
+            <!-- Grupo Sanguineo <br>
+            <select name="" >
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select> -->
+
+            <!-- <input type="text" name="prevision" required> -->
+            
+            <button type="submit">Guardar paciente</button>
+        </form>
+        <hr>
+    </div>
+    <div>
+        <form action="{% url 'listar_paciente' %}">
+            <button>↩ Volver al listado de pacientes</button>
+        </form>
+    </div>
+</body>
+</html>
