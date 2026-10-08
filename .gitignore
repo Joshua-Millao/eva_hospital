@@ -1,1 +1,33 @@
-tareas/db.sqlite3
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+**/__pycache__/
+tareas/tareas/__pycache__/
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+local_settings.py
+
+# Environments
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store   
+
+tareas/tareas/__pycache__/settings.cpython-312.pyc
+tareas/requirements.txt
+tareas/tareasapp/templates/test.html
+tareas\tareas\__pycache__\
