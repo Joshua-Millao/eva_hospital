@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eliminar paciente</title>
+</head>
+<body>
+    <div>
+        <h3>Esta seguro de eliminar este paciente?</h3>
+        <hr>
+    </div>
+    <div>
+        <div>
+            <h3>{{paciente.nombre}}</h3>
+            <p>{{paciente.rut}}</p>
+            <p>{{paciente.prevision}}</p>
+            <p>{{paciente.fecha_nacimiento}}</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit">
+                Eliminar paciente
+            </button>
+        </form>
+        <hr>
+    </div>
+    <div>
+        <form action="/">
+            <button>Cancelar</button>
+        </form>
+    </div>
+</body>
+</html>

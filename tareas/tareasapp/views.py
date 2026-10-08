@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_list_or_404
 from django.http import HttpResponse
-from .models import *
+from .models import Paciente
 
 # Create your views here.
 
@@ -39,6 +39,18 @@ def detalle_paciente(request):
 
 def modificar_paciente(request):
     pass
+
+def eliminar_paciente(request, id):
+    paciente_eliminar = Paciente.objects.get(id=id)
+
+    if request.method== 'POST':
+        paciente_eliminar.delete()
+
+        return redirect('inicio')
+
+    return render(request, 'eliminar_paciente.html', {
+        'paciente': paciente_eliminar
+    })
 
 # def pagina_test(request):
 

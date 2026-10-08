@@ -20,16 +20,13 @@
     <div>
         {% for paciente in pacientes %}
         <div>
-            <table> 
-                <tr> 
-                    <td>
-                        <h3>{{paciente.nombre}}</h3>
-                        <p>{{paciente.rut}}</p>
-                        <p>{{paciente.prevision}}</p>
-                        <p>{{paciente.fecha_nacimiento}}</p>
-                    </td> 
-                </tr> 
-            </table>
+            <h3>{{paciente.nombre}}</h3>
+            <p>{{paciente.rut}}</p>
+            <p>{{paciente.prevision}}</p>
+            <p>{{paciente.fecha_nacimiento}}</p>
+            <form action="{% url 'eliminar_paciente' paciente.id %}">
+                <button>🧺</button>
+            </form>
         </div>
 
         {% empty %}
