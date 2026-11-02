@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles </title>
+</head>
+<body>
+    <div>
+        <h2>Informacion</h2>
+        <b>({{ paciente.nombre }})</b>
+        <hr>
+    </div>
+    <div>
+        <b style="font-size:larger;">{{ paciente.nombre }}</b>
+        <p><b>RUT:</b> {{ paciente.rut }}</p>
+
+        <p><b>Fecha de nacimiento:</b> <br> {{ paciente.fecha_nacimiento }}</p>
+        <p><b>Direccion:</b> <br> {{ paciente.direccion }}</p>
+        <p><b>Telefono:</b> <br> {{ paciente.telefono }}</p>
+        <p><b>Prevision:</b> <br> {{ paciente.prevision }}</p>
+
+        <hr>
+    </div>
+    <form action="{% url 'listar_paciente' %}">
+        <button>↩ Volver al listado de pacientes</button>
+    </form>
+</body>
+</html>
