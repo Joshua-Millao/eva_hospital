@@ -1,61 +1,306 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Pacientes</title>
-        <!-- <link rel="stylesheet" href=""> -->
-    </head>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Pacientes - Sistema Clínico</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 24px;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 900px;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            height: fit-content;
+        }
+
+        /* Encabezado */
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .header-title p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Tabla moderna */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .patient-rut {
+            font-family: monospace;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Botones de acción en la tabla */
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-view {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .btn-view:hover {
+            background-color: #dbeafe;
+        }
+
+        .btn-edit {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .btn-edit:hover {
+            background-color: #e2e8f0;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state span {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Pie de página / Volver */
+        .footer-actions {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .btn-secondary {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: color 0.2s, background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-main);
+            background-color: #f1f5f9;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .actions-cell {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
+    </style>
+</head>
 <body>
-    <div>
-        <h2>Listado de pacientes</h2>
-        <hr/>
-    </div>
-    <div>
-        <form action="{% url 'crear_paciente' %}">
-            <button>➕ Añadir paciente</button>
-        </form>
-       
-        <hr>
-    </div>
-    <div>
-        {% for paciente in pacientes %}
-        <div style="border: 1px solid; width: 400px; padding: 8px; margin: 2px;">
-            <b style="font-size:larger;">{{paciente.nombre}}</b>
-            <p>RUT {{paciente.rut}}</p>
-            
+
+    <main class="container">
+        <header class="header-flex">
+            <div class="header-title">
+                <h2>Listado de pacientes</h2>
+                <p>Gestione y consulte los registros médicos del sistema.</p>
+            </div>
+            <a href="{% url 'crear_paciente' %}" class="btn-primary">
+                <span>➕</span> Añadir paciente
+            </a>
+        </header>
+
+        <div class="table-responsive">
             <table>
-                <tr>
-                    <td>
-                        <form action="{% url 'detalle_paciente' paciente.id %}">
-                            <button>👁️ Ver Mas</button>
-                        </form>
-                    </td>
-                    <td>
-                        <form action="{% url 'editar_paciente' paciente.id %}">
-                            <button>✏️ Editar</button>
-                        </form>
-                    </td>
-                    <td>
-                        <form action="{% url 'eliminar_paciente' paciente.id %}">
-                            <button>🗑️ Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>RUT</th>
+                        <th style="text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                    <tr>
+                        <td>
+                            <span class="patient-name">{{ paciente.nombre }}</span>
+                        </td>
+                        <td>
+                            <span class="patient-rut">{{ paciente.rut }}</span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-action btn-view">
+                                    👁️ Ver
+                                </a>
+                                <a href="{% url 'editar_paciente' paciente.id %}" class="btn-action btn-edit">
+                                    ✏️ Editar
+                                </a>
+                                <a href="{% url 'eliminar_paciente' paciente.id %}" class="btn-action btn-delete">
+                                    🗑️ Eliminar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <span>❕</span>
+                                <p>No hay pacientes registrados en el sistema.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-            
         </div>
 
-        {% empty %}
-         No hay pacientes registrados ❕
+        <footer class="footer-actions">
+            <a href="/" class="btn-secondary">↩ Volver al inicio</a>
+        </footer>
+    </main>
 
-        {% endfor %}
-
-        <hr>
-    </div>
-    <div>
-        <form action="/">
-            <button>↩ Volver al inicio</button>
-        </form>
-    </div>
 </body>
 </html>

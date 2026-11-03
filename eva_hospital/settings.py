@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,12 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # APLICACION INSTALADA A DJANGO !!!!!!!!!!!!!!!!!!!!!!!!!
-    # APLICACION INSTALADA A DJANGO !!!!!!!!!!!!!!!!!!!!!!!!!
-    # APLICACION INSTALADA A DJANGO !!!!!!!!!!!!!!!!!!!!!!!!!
-    'hospitalapp',
+        # Django REST Framework
+    'rest_framework',
+    'rest_framework.authtoken',
+    'tareasapp',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -255,3 +256,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 # DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+

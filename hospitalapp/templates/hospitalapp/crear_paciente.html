@@ -1,91 +1,255 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Agregar paciente</title>
-        <style>
-            .error-cont
-            {
-                border: 1px solid #000000; 
-                background-color: rgb(255, 68, 55);
-                /* color: #fff; */
-                width: 400px;
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Paciente</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --error-bg: #fef2f2;
+            --error-border: #ef4444;
+            --error-text: #991b1b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 540px;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .card-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Alerta de error */
+        .error-cont {
+            background-color: var(--error-bg);
+            border-left: 4px solid var(--error-border);
+            color: var(--error-text);
+            padding: 14px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .error-cont strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Estructura del formulario */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background-color: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Botones */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
             }
-        </style>
-    </head>
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
 <body>
-    <div>
-        <h2> Agregar paciente </h2>
-        <hr/>
-    </div>
-    <div>
-        {% if error_detectado != 0%}
-        <div class="error-cont">
-            <b>
-                {% if error_detectado != 0%}
-                Se produjo un error: 
-                {% endif %}
-                
-                {% if error_detectado == 1 %}
-                <p> El rut esta repetido, Ingrese uno diferente</p>
-                {% endif %}
-            </b>
+
+    <main class="card">
+        <header class="card-header">
+            <h2>Agregar paciente</h2>
+            <p>Complete los datos para registrar un nuevo paciente en el sistema.</p>
+        </header>
+
+        {% if error_detectado != 0 %}
+        <div class="error-cont" role="alert">
+            <strong>Se produjo un error:</strong>
+            {% if error_detectado == 1 %}
+                <p>El RUT ingresado ya está registrado. Por favor, verifique e ingrese uno diferente.</p>
+            {% endif %}
         </div>
-       {% endif %}
+        {% endif %}
+
         <form method="POST">
-            
             {% csrf_token %}
 
-            Rut <br>
-            <input type="text" 
-            name="rut" maxlength="12" required> <br>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="rut">RUT</label>
+                    <input type="text" id="rut" name="rut" maxlength="12" placeholder="Ej: 12.345.678-9" required>
+                </div>
 
-            Nombre <br>
-            <input type="text" 
-            name="nombre" maxlength="100" required> <br>
+                <div class="form-group">
+                    <label for="fecha_nacim">Fecha de nacimiento</label>
+                    <input type="date" id="fecha_nacim" name="fecha_nacim" required>
+                </div>
 
-            Fecha de nacimiento <br>
-            <input type="date" 
-            name="fecha_nacim" required> <br>
+                <div class="form-group full-width">
+                    <label for="nombre">Nombre completo</label>
+                    <input type="text" id="nombre" name="nombre" maxlength="100" placeholder="Nombre y apellidos" required>
+                </div>
 
-            Direccion <br>
-            <input type="text" 
-            name="direccion" maxlength="200" required> <br>
+                <div class="form-group full-width">
+                    <label for="direccion">Dirección</label>
+                    <input type="text" id="direccion" name="direccion" maxlength="200" placeholder="Calle, número, comuna" required>
+                </div>
 
-            Telefono <br>
-            <input type="text" 
-            name="telefono" maxlength="20" required> <br>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" maxlength="20" placeholder="+56 9 1234 5678" required>
+                </div>
 
-            Prevision <br>
-            <select name="prevision" >
-                <option value="fonasa a">Fonasa A</option>
-                <option value="fonasa b">Fonasa B</option>
-                <option value="isapre">Isapre</option>
-                <option value="ninguna">Ninguna</option>
-            </select> <br> <br>
+                <div class="form-group">
+                    <label for="prevision">Previsión</label>
+                    <select id="prevision" name="prevision" required>
+                        <option value="fonasa a">Fonasa A</option>
+                        <option value="fonasa b">Fonasa B</option>
+                        <option value="isapre">Isapre</option>
+                        <option value="ninguna">Ninguna</option>
+                    </select>
+                </div>
 
-            <!-- Grupo Sanguineo <br>
-            <select name="" >
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-            </select> -->
+                <!-- Descomentar cuando habilites Grupo Sanguíneo en la base de datos:
+                <div class="form-group full-width">
+                    <label for="grupo_sanguineo">Grupo Sanguíneo</label>
+                    <select id="grupo_sanguineo" name="grupo_sanguineo">
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+                -->
+            </div>
 
-            <!-- <input type="text" name="prevision" required> -->
-            
-            <button type="submit">Guardar paciente</button>
+            <div class="actions">
+                <button type="submit" class="btn-primary">Guardar paciente</button>
+                <a href="{% url 'listar_paciente' %}" class="btn-secondary">↩ Volver al listado de pacientes</a>
+            </div>
         </form>
-        <hr>
-    </div>
-    <div>
-        <form action="{% url 'listar_paciente' %}">
-            <button>↩ Volver al listado de pacientes</button>
-        </form>
-    </div>
+    </main>
+
 </body>
 </html>

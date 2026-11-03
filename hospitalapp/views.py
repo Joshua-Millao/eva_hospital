@@ -4,6 +4,15 @@ from .models import Paciente
 from .models import FichaMedica
 from .models import Medico
 
+from django.http import HttpResponse
+from django.contrib.auth import authenticate
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+
 # Create your views here.
 
 # ==========================================
@@ -118,3 +127,102 @@ def eliminar_paciente(request, id):
     return render(request, 'hospitalapp/eliminar_paciente.html', {
         'paciente': paciente_eliminar
     })
+
+
+# Integracion de la Api
+class LoginAPIView(APIView):
+
+    permission_classes =[AllowAny]
+
+    def post(self, request):
+
+        #Recibir las credenciales desde el JSON
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        #Validar las credenciales de usuarios
+
+        usuario = authenticate(
+            username=username,
+            password=password
+        )
+
+        if usuario is not None:
+
+            token, creado = Token.objects.get_or_create(
+                user=usuario
+            )
+
+            return Response({
+                'mensaje': 'Autenticacion correcta',
+                'usuario': usuario.username,
+                'token':token.key
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'error': 'Usuario o contraseña incorrecta'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
+class hospitalApiView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    # GET lista todas las tareas
+
+    def get(self, request):
+
+        paceinte = Paciente.objects.all()
+
+        datos = []
+
+        for paciente in paciente:
+            datos.append({
+                'rut': paciente.rut,
+                'nombre': paciente.nombre,
+                'fecha_nacimiento': paciente.fecha_nacimiento,
+                'direccion': paciente.direccion,
+                'telefono': paciente.telefono,
+                'prevision': paciente.prevision
+            })
+        return Response(datos, status.HTTP_200_OK)
+
+    def post(self, request):
+
+        rut = request.data.get('rut')
+        nombre = request.data.get('nombre')
+        fecha_nacimiento = request.data.get('fecha_nacimiento')
+        direccion = request.data.get('direccion')
+        telefono = request.data.get('telefono')
+        prevision = request.data.get('prevision')
+
+        # Validar que los campos obligatorios tengan datos
+
+        if not rut or not nombre or not fecha_nacimiento or not direccion or not telefono:
+            return Response({
+                'error':'El rut, el nombre y fecha de nacimiento, direccion y telefono son obligatorias.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear y guardar el paciente enla BD
+
+        paciente = Paciente.objects.create(
+            rut = rut,
+            nombre = nombre,
+            fecha_nacimiento = fecha_nacimiento,
+            direccion = direccion,
+            telefono = telefono,
+            prevision = prevision
+        )
+
+        # Devolver el paciente creado
+
+        return Response({
+            'Mensaje':'Paciente creado correctamente',
+            'Paciente':{
+                'rut': paciente.rut,
+                'nombre': paciente.nombre,
+                'fecha_nacimiento': paciente.fecha_nacimiento,
+                'direccion': paciente.direccion,
+                'telefono': paciente.telefono,
+                'prevision': paciente.prevision
+            }
+        }, status=status.HTTP_201_CREATED)
