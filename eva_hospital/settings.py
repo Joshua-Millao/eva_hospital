@@ -41,7 +41,7 @@ INSTALLED_APPS = [
         # Django REST Framework
     'rest_framework',
     'rest_framework.authtoken',
-    'tareasapp',
+    'hospitalapp',
 ]
 
 
