@@ -1,8 +1,9 @@
-from django.shortcuts import render,redirect, get_list_or_404
+from django.shortcuts import render,redirect, get_object_or_404
 from django.db import IntegrityError
 from .models import Paciente
 from .models import FichaMedica
 from .models import Medico
+from .models import Hospital
 
 from django.http import HttpResponse
 from django.contrib.auth import authenticate
@@ -226,3 +227,30 @@ class hospitalApiView(APIView):
                 'prevision': paciente.prevision
             }
         }, status=status.HTTP_201_CREATED)
+
+
+class hospitalDetalleApiView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    # Get: Consultar un paciente por id
+    def get(self, request, id):
+        paciente = get_object_or_404(Paciente, id=id)
+
+        return Response({
+            'id': paciente.id,
+            'rut': paciente.rut,
+            'nombre': paciente.nombre,
+            'fecha_nacimiento': paciente.fecha_nacimiento,
+            'direccion': paciente.direccion,
+            'telefono': paciente.telefono,
+            'prevision': paciente.prevision
+        }, status=status.HTTP_200_OK)
+
+    #Delete: Eliminar un paciente
+    def delete(self, request, id):
+        paciente = get_object_or_404(Paciente, id=id)
+        paciente.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
