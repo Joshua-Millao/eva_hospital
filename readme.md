@@ -1,3 +1,3 @@
-## ya casi amigo
+### app django hospitalll
 
-uyyyyy. se me colo una mala palabra. sorry uwu
+slaio biennn :DDDD
