@@ -177,11 +177,11 @@ class hospitalApiView(APIView):
 
     def get(self, request):
 
-        paceinte = Paciente.objects.all()
+        pacientes = Paciente.objects.all()
 
         datos = []
 
-        for paciente in paciente:
+        for paciente in pacientes:
             datos.append({
                 'rut': paciente.rut,
                 'nombre': paciente.nombre,
@@ -206,6 +206,12 @@ class hospitalApiView(APIView):
         if not rut or not nombre or not fecha_nacimiento or not direccion or not telefono:
             return Response({
                 'error':'El rut, el nombre y fecha de nacimiento, direccion y telefono son obligatorias.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar si el RUT ya existe en la base de datos ANTES de crear
+        if Paciente.objects.filter(rut=rut).exists():
+            return Response({
+                'error': 'El RUT ingresado ya está registrado en el sistema.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # Crear y guardar el paciente enla BD
@@ -239,7 +245,6 @@ class hospitalDetalleApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    # Get: Consultar un paciente por id
     def get(self, request, id):
         paciente = get_object_or_404(Paciente, id=id)
 
@@ -253,7 +258,48 @@ class hospitalDetalleApiView(APIView):
             'prevision': paciente.prevision
         }, status=status.HTTP_200_OK)
 
-    #Delete: Eliminar un paciente
+    def put(self, request, id):
+        paciente = get_object_or_404(Paciente, id=id)
+
+        rut = request.data.get('rut')
+        nombre = request.data.get('nombre')
+        fecha_nacimiento = request.data.get('fecha_nacimiento')
+        direccion = request.data.get('direccion')
+        telefono = request.data.get('telefono')
+        prevision = request.data.get('prevision', 'ninguna')
+
+        if not rut or not nombre or not fecha_nacimiento or not direccion or not telefono:
+            return Response({
+                'error': 'El RUT, nombre, fecha de nacimiento, dirección y teléfono son obligatorios.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if Paciente.objects.filter(rut=rut).exclude(id=paciente.id).exists():
+            return Response({
+                'error': 'El RUT ingresado ya está registrado por otro paciente.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Actualizar los campos del paciente
+        paciente.rut = rut
+        paciente.nombre = nombre
+        paciente.fecha_nacimiento = fecha_nacimiento
+        paciente.direccion = direccion
+        paciente.telefono = telefono
+        paciente.prevision = prevision
+        paciente.save()
+
+        return Response({
+            'mensaje': 'Paciente actualizado correctamente',
+            'paciente': {
+                'id': paciente.id,
+                'rut': paciente.rut,
+                'nombre': paciente.nombre,
+                'fecha_nacimiento': paciente.fecha_nacimiento,
+                'direccion': paciente.direccion,
+                'telefono': paciente.telefono,
+                'prevision': paciente.prevision
+            }
+        }, status=status.HTTP_200_OK)
+
     def delete(self, request, id):
         paciente = get_object_or_404(Paciente, id=id)
         paciente.delete()
