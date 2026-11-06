@@ -1,11 +1,3 @@
-# asi se ve hasta ahora :)
+## ya casi amigo
 
-### dashboard
-![alt text](/screenshot1.png)
-### lista/menu principal
-![alt text](/screenshot2.png)
-### detalle
-![alt text](/screenshot3.png)
-
-perdon pero me da flojera poner lo demas <br>
-salio bien 👍👍
+uyyyyy. se me colo una mala palabra. sorry uwu
