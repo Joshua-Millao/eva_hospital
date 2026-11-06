@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Paciente - {{ paciente.nombre }}</title>
+    <title>Editar Paciente</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -45,7 +45,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Encabezado */
         .card-header {
             margin-bottom: 24px;
             padding-bottom: 16px;
@@ -77,11 +76,6 @@
             margin-top: 4px;
         }
 
-        .card-header p strong {
-            color: var(--text-main);
-        }
-
-        /* Alerta de error */
         .error-cont {
             background-color: var(--error-bg);
             border-left: 4px solid var(--error-border);
@@ -92,12 +86,6 @@
             font-size: 0.95rem;
         }
 
-        .error-cont strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        /* Estructura del formulario */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -119,20 +107,6 @@
             font-weight: 600;
             margin-bottom: 6px;
             color: var(--text-main);
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .current-data {
-            font-size: 0.78rem;
-            font-weight: 500;
-            color: var(--primary);
-            background-color: var(--primary-light);
-            padding: 2px 8px;
-            border-radius: 4px;
         }
 
         input, select {
@@ -142,20 +116,14 @@
             font-size: 0.95rem;
             color: var(--text-main);
             background-color: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        input::placeholder {
-            color: #94a3b8;
+            outline: none;
         }
 
         input:focus, select:focus {
-            outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
-        /* Botones */
         .actions {
             display: flex;
             flex-direction: column;
@@ -190,21 +158,6 @@
             font-weight: 600;
             padding: 10px;
             border-radius: 8px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        @media (max-width: 480px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .full-width {
-                grid-column: span 1;
-            }
         }
     </style>
 </head>
@@ -214,58 +167,46 @@
         <header class="card-header">
             <span class="header-badge">Modo Edición</span>
             <h2>Editar paciente</h2>
-            <p>Modificando el registro de <strong>{{ paciente.nombre }}</strong></p>
+            <p id="subtituloModo">Cargando datos...</p>
         </header>
 
-        {% if error_detectado != 0 %}
-        <div class="error-cont" role="alert">
+        <div id="error-cont" class="error-cont" role="alert" style="display: none;">
             <strong>Se produjo un error:</strong>
-            {% if error_detectado == 1 %}
-                <p>El RUT está repetido. Por favor, ingrese uno diferente.</p>
-            {% elif error_detectado == 2 %}
-                <p>El RUT ya está ingresado en el sistema.</p>
-            {% endif %}
+            <p id="error-texto"></p>
         </div>
-        {% endif %}
 
-        <form method="POST">
-            {% csrf_token %}
+        <p id="mensaje-carga" style="margin-bottom: 20px;">Obteniendo información del paciente...</p>
 
+        <form id="formEditarPaciente" hidden>
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="rut">RUT</label>
-                    <input type="text" id="rut" name="rut" maxlength="12" placeholder="{{ paciente.rut }}">
+                    <input type="text" id="rut" name="rut" maxlength="12" required>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="nombre">Nombre completo</label>
-                    <input type="text" id="nombre" name="nombre" maxlength="100" placeholder="{{ paciente.nombre }}">
+                    <input type="text" id="nombre" name="nombre" maxlength="100" required>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="fecha_nacim">
-                        <span>Fecha de nacimiento</span>
-                        <span class="current-data">Actual: {{ paciente.fecha_nacimiento }}</span>
-                    </label>
+                    <label for="fecha_nacim">Fecha de nacimiento</label>
                     <input type="date" id="fecha_nacim" name="fecha_nacim" required>
                 </div>
 
                 <div class="form-group full-width">
                     <label for="direccion">Dirección</label>
-                    <input type="text" id="direccion" name="direccion" maxlength="200" placeholder="{{ paciente.direccion }}">
+                    <input type="text" id="direccion" name="direccion" maxlength="200" required>
                 </div>
 
                 <div class="form-group">
                     <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" maxlength="20" placeholder="{{ paciente.telefono }}">
+                    <input type="tel" id="telefono" name="telefono" maxlength="20" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="prevision">
-                        <span>Previsión</span>
-                        <span class="current-data" style="text-transform: capitalize;">Actual: {{ paciente.prevision }}</span>
-                    </label>
-                    <select id="prevision" name="prevision">
+                    <label for="prevision">Previsión</label>
+                    <select id="prevision" name="prevision" required>
                         <option value="fonasa a">Fonasa A</option>
                         <option value="fonasa b">Fonasa B</option>
                         <option value="isapre">Isapre</option>
@@ -276,10 +217,106 @@
 
             <div class="actions">
                 <button type="submit" class="btn-primary">Guardar cambios</button>
-                <a href="{% url 'listar_paciente' %}" class="btn-secondary">↩ Cancelar</a>
+                <a href="/listar_paciente/" class="btn-secondary">↩ Cancelar</a>
             </div>
         </form>
     </main>
 
+    <script>
+        const token = sessionStorage.getItem('token');
+        const partesURL = window.location.pathname.split('/').filter(Boolean);
+        const pacienteId = partesURL[partesURL.length - 1];
+
+        const formulario = document.getElementById('formEditarPaciente');
+        const mensajeCarga = document.getElementById('mensaje-carga');
+        const errorCont = document.getElementById('error-cont');
+        const errorTexto = document.getElementById('error-texto');
+        const subtituloModo = document.getElementById('subtituloModo');
+
+        async function cargarDatosPaciente() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo cargar el paciente.');
+                }
+
+                const paciente = await respuesta.json();
+
+                document.getElementById('rut').value = paciente.rut;
+                document.getElementById('nombre').value = paciente.nombre;
+                document.getElementById('fecha_nacim').value = paciente.fecha_nacimiento;
+                document.getElementById('direccion').value = paciente.direccion;
+                document.getElementById('telefono').value = paciente.telefono;
+                document.getElementById('prevision').value = paciente.prevision.toLowerCase();
+
+                subtituloModo.innerHTML = `Modificando el registro de <strong>${paciente.nombre}</strong>`;
+                mensajeCarga.style.display = 'none';
+                formulario.hidden = false;
+
+            } catch (error) {
+                mensajeCarga.textContent = error.message;
+                mensajeCarga.style.color = '#dc2626';
+                console.error(error);
+            }
+        }
+
+        formulario.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            errorCont.style.display = 'none';
+
+            const datosActualizados = {
+                rut: document.getElementById('rut').value.trim(),
+                nombre: document.getElementById('nombre').value.trim(),
+                fecha_nacimiento: document.getElementById('fecha_nacim').value,
+                direccion: document.getElementById('direccion').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                prevision: document.getElementById('prevision').value
+            };
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${token}`
+                    },
+                    body: JSON.stringify(datosActualizados)
+                });
+
+                const datos = await respuesta.json();
+
+                if (respuesta.ok) {
+                    window.location.href = '/listar_paciente/';
+                } else {
+                    errorTexto.textContent = datos.error || 'No se pudo actualizar el paciente.';
+                    errorCont.style.display = 'block';
+                }
+
+            } catch (error) {
+                errorTexto.textContent = 'Error de conexión con el servidor.';
+                errorCont.style.display = 'block';
+                console.error(error);
+            }
+        });
+
+        cargarDatosPaciente();
+    </script>
 </body>
 </html>

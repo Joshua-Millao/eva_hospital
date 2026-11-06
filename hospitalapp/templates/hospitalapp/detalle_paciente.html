@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Paciente - {{ paciente.nombre }}</title>
+    <title>Detalles del Paciente</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -41,7 +41,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Encabezado de la ficha */
         .profile-header {
             display: flex;
             justify-content: space-between;
@@ -80,7 +79,6 @@
             white-space: nowrap;
         }
 
-        /* Grilla de datos */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -116,12 +114,9 @@
             word-break: break-word;
         }
 
-        /* Pie de tarjeta / Botón */
         .actions {
             padding-top: 20px;
             border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-start;
         }
 
         .btn-back {
@@ -136,68 +131,114 @@
             font-weight: 600;
             padding: 12px 16px;
             border-radius: 8px;
-            transition: background-color 0.2s, color 0.2s;
+            transition: background-color 0.2s;
         }
 
         .btn-back:hover {
             background-color: #e2e8f0;
-        }
-
-        @media (max-width: 480px) {
-            .profile-header {
-                flex-direction: column;
-            }
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            .full-width {
-                grid-column: span 1;
-            }
         }
     </style>
 </head>
 <body>
 
     <main class="card">
-        <header class="profile-header">
-            <div class="profile-title">
-                <span>Ficha del Paciente</span>
-                <h2>{{ paciente.nombre }}</h2>
-            </div>
-            <span class="badge-prevision">{{ paciente.prevision }}</span>
-        </header>
+        <p id="mensaje-carga" style="text-align: center;">Cargando información del paciente...</p>
 
-        <section class="info-grid">
-            <div class="info-item">
-                <span class="info-label">RUT</span>
-                <p class="info-value">{{ paciente.rut }}</p>
-            </div>
+        <div id="contenido-detalle" hidden>
+            <header class="profile-header">
+                <div class="profile-title">
+                    <span>Ficha del Paciente</span>
+                    <h2 id="nombrePaciente"></h2>
+                </div>
+                <span class="badge-prevision" id="previsionBadge"></span>
+            </header>
 
-            <div class="info-item">
-                <span class="info-label">Fecha de nacimiento</span>
-                <p class="info-value">{{ paciente.fecha_nacimiento }}</p>
-            </div>
+            <section class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">RUT</span>
+                    <p class="info-value" id="rutPaciente"></p>
+                </div>
 
-            <div class="info-item">
-                <span class="info-label">Teléfono</span>
-                <p class="info-value">{{ paciente.telefono }}</p>
-            </div>
+                <div class="info-item">
+                    <span class="info-label">Fecha de nacimiento</span>
+                    <p class="info-value" id="fechaNacimiento"></p>
+                </div>
 
-            <div class="info-item">
-                <span class="info-label">Previsión</span>
-                <p class="info-value" style="text-transform: capitalize;">{{ paciente.prevision }}</p>
-            </div>
+                <div class="info-item">
+                    <span class="info-label">Teléfono</span>
+                    <p class="info-value" id="telefonoPaciente"></p>
+                </div>
 
-            <div class="info-item full-width">
-                <span class="info-label">Dirección</span>
-                <p class="info-value">{{ paciente.direccion }}</p>
-            </div>
-        </section>
+                <div class="info-item">
+                    <span class="info-label">Previsión</span>
+                    <p class="info-value" id="previsionPaciente" style="text-transform: capitalize;"></p>
+                </div>
+
+                <div class="info-item full-width">
+                    <span class="info-label">Dirección</span>
+                    <p class="info-value" id="direccionPaciente"></p>
+                </div>
+            </section>
+        </div>
 
         <footer class="actions">
-            <a href="{% url 'listar_paciente' %}" class="btn-back">↩ Volver al listado de pacientes</a>
+            <a href="/listar_paciente/" class="btn-back">↩ Volver al listado de pacientes</a>
         </footer>
     </main>
 
+    <script>
+        const token = sessionStorage.getItem('token');
+        const partesURL = window.location.pathname.split('/').filter(Boolean);
+        const pacienteId = partesURL[partesURL.length - 1];
+
+        const mensajeCarga = document.getElementById('mensaje-carga');
+        const contenidoDetalle = document.getElementById('contenido-detalle');
+
+        async function cargarDetalle() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudo cargar la información del paciente.');
+                }
+
+                const paciente = await respuesta.json();
+
+                document.getElementById('nombrePaciente').textContent = paciente.nombre;
+                document.getElementById('previsionBadge').textContent = paciente.prevision;
+                document.getElementById('rutPaciente').textContent = paciente.rut;
+                document.getElementById('fechaNacimiento').textContent = paciente.fecha_nacimiento;
+                document.getElementById('telefonoPaciente').textContent = paciente.telefono;
+                document.getElementById('previsionPaciente').textContent = paciente.prevision;
+                document.getElementById('direccionPaciente').textContent = paciente.direccion;
+
+                mensajeCarga.style.display = 'none';
+                contenidoDetalle.hidden = false;
+
+            } catch (error) {
+                mensajeCarga.textContent = error.message;
+                mensajeCarga.style.color = '#dc2626';
+                console.error(error);
+            }
+        }
+
+        cargarDetalle();
+    </script>
 </body>
 </html>

@@ -62,7 +62,6 @@
             margin-top: 4px;
         }
 
-        /* Alerta de error */
         .error-cont {
             background-color: var(--error-bg);
             border-left: 4px solid var(--error-border);
@@ -73,12 +72,6 @@
             font-size: 0.95rem;
         }
 
-        .error-cont strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        /* Estructura del formulario */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -109,16 +102,14 @@
             font-size: 0.95rem;
             color: var(--text-main);
             background-color: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
         }
 
         input:focus, select:focus {
-            outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
-        /* Botones */
         .actions {
             display: flex;
             flex-direction: column;
@@ -153,21 +144,6 @@
             font-weight: 500;
             padding: 10px;
             border-radius: 8px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        @media (max-width: 480px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .full-width {
-                grid-column: span 1;
-            }
         }
     </style>
 </head>
@@ -179,18 +155,12 @@
             <p>Complete los datos para registrar un nuevo paciente en el sistema.</p>
         </header>
 
-        {% if error_detectado != 0 %}
-        <div class="error-cont" role="alert">
+        <div id="error-cont" class="error-cont" role="alert" style="display: none;">
             <strong>Se produjo un error:</strong>
-            {% if error_detectado == 1 %}
-                <p>El RUT ingresado ya está registrado. Por favor, verifique e ingrese uno diferente.</p>
-            {% endif %}
+            <p id="error-texto"></p>
         </div>
-        {% endif %}
 
-        <form method="POST">
-            {% csrf_token %}
-
+        <form id="formCrearPaciente">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="rut">RUT</label>
@@ -226,30 +196,63 @@
                         <option value="ninguna">Ninguna</option>
                     </select>
                 </div>
-
-                <!-- Descomentar cuando habilites Grupo Sanguíneo en la base de datos:
-                <div class="form-group full-width">
-                    <label for="grupo_sanguineo">Grupo Sanguíneo</label>
-                    <select id="grupo_sanguineo" name="grupo_sanguineo">
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                    </select>
-                </div>
-                -->
             </div>
 
             <div class="actions">
                 <button type="submit" class="btn-primary">Guardar paciente</button>
-                <a href="{% url 'listar_paciente' %}" class="btn-secondary">↩ Volver al listado de pacientes</a>
+                <a href="/listar_paciente/" class="btn-secondary">↩ Volver al listado de pacientes</a>
             </div>
         </form>
     </main>
 
+    <script>
+        const token = sessionStorage.getItem('token');
+        const formulario = document.getElementById('formCrearPaciente');
+        const errorCont = document.getElementById('error-cont');
+        const errorTexto = document.getElementById('error-texto');
+
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        formulario.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            errorCont.style.display = 'none';
+
+            const paciente = {
+                rut: document.getElementById('rut').value.trim(),
+                fecha_nacimiento: document.getElementById('fecha_nacim').value,
+                nombre: document.getElementById('nombre').value.trim(),
+                direccion: document.getElementById('direccion').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                prevision: document.getElementById('prevision').value
+            };
+
+            try {
+                const respuesta = await fetch('/api/hospital/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${token}`
+                    },
+                    body: JSON.stringify(paciente)
+                });
+
+                const datos = await respuesta.json();
+
+                if (respuesta.ok) {
+                    window.location.href = '/listar_paciente/';
+                } else {
+                    errorTexto.textContent = datos.error || 'No se pudo crear el paciente.';
+                    errorCont.style.display = 'block';
+                }
+
+            } catch (error) {
+                errorTexto.textContent = 'Error de conexión con el servidor.';
+                errorCont.style.display = 'block';
+                console.error(error);
+            }
+        });
+    </script>
 </body>
 </html>

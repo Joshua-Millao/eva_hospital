@@ -47,7 +47,6 @@
             height: fit-content;
         }
 
-        /* Encabezado */
         .header-flex {
             display: flex;
             justify-content: space-between;
@@ -89,7 +88,6 @@
             background-color: var(--primary-hover);
         }
 
-        /* Tabla moderna */
         .table-responsive {
             overflow-x: auto;
         }
@@ -136,7 +134,6 @@
             border-radius: 4px;
         }
 
-        /* Botones de acción en la tabla */
         .actions-cell {
             display: flex;
             gap: 8px;
@@ -183,7 +180,6 @@
             background-color: #fee2e2;
         }
 
-        /* Estado vacío */
         .empty-state {
             text-align: center;
             padding: 48px 24px;
@@ -201,7 +197,6 @@
             font-weight: 500;
         }
 
-        /* Pie de página / Volver */
         .footer-actions {
             padding-top: 16px;
             border-top: 1px solid var(--border-color);
@@ -226,16 +221,6 @@
             color: var(--text-main);
             background-color: #f1f5f9;
         }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            .actions-cell {
-                flex-direction: column;
-                align-items: flex-end;
-            }
-        }
     </style>
 </head>
 <body>
@@ -246,7 +231,7 @@
                 <h2>Listado de pacientes</h2>
                 <p>Gestione y consulte los registros médicos del sistema.</p>
             </div>
-            <a href="{% url 'crear_paciente' %}" class="btn-primary">
+            <a href="/crear_paciente/" class="btn-primary">
                 <span>➕</span> Añadir paciente
             </a>
         </header>
@@ -260,39 +245,12 @@
                         <th style="text-align: right;">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for paciente in pacientes %}
+                <tbody id="tabla-pacientes">
                     <tr>
-                        <td>
-                            <span class="patient-name">{{ paciente.nombre }}</span>
-                        </td>
-                        <td>
-                            <span class="patient-rut">{{ paciente.rut }}</span>
-                        </td>
-                        <td>
-                            <div class="actions-cell">
-                                <a href="{% url 'detalle_paciente' paciente.id %}" class="btn-action btn-view">
-                                    👁️ Ver
-                                </a>
-                                <a href="{% url 'editar_paciente' paciente.id %}" class="btn-action btn-edit">
-                                    ✏️ Editar
-                                </a>
-                                <a href="{% url 'eliminar_paciente' paciente.id %}" class="btn-action btn-delete">
-                                    🗑️ Eliminar
-                                </a>
-                            </div>
+                        <td colspan="3" class="empty-state">
+                            <p>Cargando pacientes...</p>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3">
-                            <div class="empty-state">
-                                <span>❕</span>
-                                <p>No hay pacientes registrados en el sistema.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -302,5 +260,78 @@
         </footer>
     </main>
 
+    <script>
+        const token = sessionStorage.getItem('token');
+        const tablaPacientes = document.getElementById('tabla-pacientes');
+
+        async function cargarPacientes() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch('/api/hospital/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok) {
+                    throw new Error('Error al consultar los pacientes.');
+                }
+
+                const pacientes = await respuesta.json();
+                tablaPacientes.replaceChildren();
+
+                if (pacientes.length === 0) {
+                    tablaPacientes.innerHTML = `
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state">
+                                    <span>❕</span>
+                                    <p>No hay pacientes registrados en el sistema.</p>
+                                </div>
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                pacientes.forEach(paciente => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><span class="patient-name">${paciente.nombre}</span></td>
+                        <td><span class="patient-rut">${paciente.rut}</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="/detalle_paciente/${paciente.id}/" class="btn-action btn-view">👁️ Ver</a>
+                                <a href="/editar_paciente/${paciente.id}/" class="btn-action btn-edit">✏️ Editar</a>
+                                <a href="/eliminar_paciente/${paciente.id}/" class="btn-action btn-delete">🗑️ Eliminar</a>
+                            </div>
+                        </td>
+                    `;
+                    tablaPacientes.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                tablaPacientes.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="empty-state">
+                            <p style="color: #dc2626;">Error de conexión con el servidor.</p>
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        cargarPacientes();
+    </script>
 </body>
 </html>

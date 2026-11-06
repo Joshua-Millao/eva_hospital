@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Paciente - {{ paciente.nombre }}</title>
+    <title>Eliminar Paciente</title>
     <style>
         :root {
             --danger: #dc2626;
@@ -44,7 +44,6 @@
             text-align: center;
         }
 
-        /* Icono superior de advertencia */
         .warning-icon {
             width: 52px;
             height: 52px;
@@ -74,7 +73,6 @@
             margin-bottom: 24px;
         }
 
-        /* Resumen del paciente a eliminar */
         .patient-summary {
             background-color: #f8fafc;
             border: 1px solid var(--border-color);
@@ -112,7 +110,6 @@
             border-radius: 6px;
         }
 
-        /* Botones de acción */
         .actions {
             display: flex;
             flex-direction: column;
@@ -136,6 +133,11 @@
             background-color: var(--danger-hover);
         }
 
+        .btn-danger:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .btn-cancel {
             display: inline-block;
             width: 100%;
@@ -147,11 +149,6 @@
             font-weight: 600;
             padding: 12px 16px;
             border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .btn-cancel:hover {
-            background-color: #e2e8f0;
         }
     </style>
 </head>
@@ -167,16 +164,103 @@
 
         <section class="patient-summary">
             <span class="patient-label">Paciente seleccionado</span>
-            <strong class="patient-name">{{ paciente.nombre }}</strong>
-            <span class="patient-rut">RUT: {{ paciente.rut }}</span>
+            <strong class="patient-name" id="nombrePaciente">Cargando...</strong>
+            <span class="patient-rut" id="rutPaciente">RUT: ...</span>
         </section>
 
-        <form method="POST" class="actions">
-            {% csrf_token %}
-            <button type="submit" class="btn-danger">Sí, eliminar paciente</button>
-            <a href="{% url 'listar_paciente' %}" class="btn-cancel">↩ Cancelar y volver</a>
-        </form>
+        <p id="mensajeEstado" style="margin-bottom: 15px; font-size: 0.9rem; font-weight: 600;"></p>
+
+        <div class="actions">
+            <button type="button" id="btnEliminar" class="btn-danger">Sí, eliminar paciente</button>
+            <a href="/listar_paciente/" class="btn-cancel">↩ Cancelar y volver</a>
+        </div>
     </main>
 
+    <script>
+        const token = sessionStorage.getItem('token');
+        const partesURL = window.location.pathname.split('/').filter(Boolean);
+        const pacienteId = partesURL[partesURL.length - 1];
+
+        const btnEliminar = document.getElementById('btnEliminar');
+        const mensajeEstado = document.getElementById('mensajeEstado');
+        const nombrePaciente = document.getElementById('nombrePaciente');
+        const rutPaciente = document.getElementById('rutPaciente');
+
+        async function cargarInfoEliminar() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok) throw new Error('No se pudo obtener la información.');
+
+                const paciente = await respuesta.json();
+                nombrePaciente.textContent = paciente.nombre;
+                rutPaciente.textContent = `RUT: ${paciente.rut}`;
+
+            } catch (error) {
+                nombrePaciente.textContent = 'Error al cargar';
+                console.error(error);
+            }
+        }
+
+        btnEliminar.addEventListener('click', async function() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            btnEliminar.disabled = true;
+            mensajeEstado.textContent = 'Eliminando paciente...';
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok && respuesta.status !== 204) {
+                    throw new Error('No se pudo eliminar el paciente.');
+                }
+
+                mensajeEstado.textContent = 'Paciente eliminado correctamente. Redirigiendo...';
+                mensajeEstado.style.color = '#166534';
+                
+                setTimeout(() => {
+                    window.location.href = '/listar_paciente/';
+                }, 1000);
+
+            } catch (error) {
+                mensajeEstado.textContent = error.message;
+                mensajeEstado.style.color = '#dc2626';
+                btnEliminar.disabled = false;
+                console.error(error);
+            }
+        });
+
+        cargarInfoEliminar();
+    </script>
 </body>
 </html>
