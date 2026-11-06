@@ -20,7 +20,12 @@ from rest_framework.authtoken.models import Token
 # 1. VISTA DE INICIO (DASHBOARD)
 # ==========================================
 
-def inicio(request):
+def login_pagina(request):
+
+    return render(request, 'hospitalapp/login.html')
+
+
+def dashboard(request):
     total_pacientes = Paciente.objects.count()
     total_fichas = FichaMedica.objects.count()
 
@@ -28,7 +33,7 @@ def inicio(request):
         "total_pacientes" : total_pacientes,
         "total_fichas" : total_fichas
     }
-    return render(request, "hospitalapp/inicio.html", contexto)
+    return render(request, "hospitalapp/dashboard.html", contexto)
 
 
 # ==========================================

@@ -7,7 +7,7 @@
 
 * abrir xampp y levantar apache y mysql
 * if a http://localhost:8082/phpmyadmin/
-* new database -> "tareasdb"
+* new database -> "hospitaldb"
 
 * python manage.py check
 * python manage.py migrate
