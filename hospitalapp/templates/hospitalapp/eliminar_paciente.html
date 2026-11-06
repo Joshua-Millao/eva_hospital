@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Paciente</title>
+    <style>
+        :root {
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --danger-light: #fef2f2;
+            --danger-border: #fecaca;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 460px;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .warning-icon {
+            width: 52px;
+            height: 52px;
+            background-color: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid var(--danger-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 16px auto;
+        }
+
+        .card-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .card-header p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+
+        .patient-summary {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .patient-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .patient-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .patient-rut {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--danger);
+            background-color: var(--danger-light);
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-danger {
+            width: 100%;
+            background-color: var(--danger);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="card">
+        <div class="warning-icon" aria-hidden="true">!</div>
+
+        <header class="card-header">
+            <h2>¿Está seguro de eliminar este paciente?</h2>
+            <p>Esta acción borrará el registro de forma permanente y no se podrá deshacer.</p>
+        </header>
+
+        <section class="patient-summary">
+            <span class="patient-label">Paciente seleccionado</span>
+            <strong class="patient-name" id="nombrePaciente">Cargando...</strong>
+            <span class="patient-rut" id="rutPaciente">RUT: ...</span>
+        </section>
+
+        <p id="mensajeEstado" style="margin-bottom: 15px; font-size: 0.9rem; font-weight: 600;"></p>
+
+        <div class="actions">
+            <button type="button" id="btnEliminar" class="btn-danger">Sí, eliminar paciente</button>
+            <a href="/listar_paciente/" class="btn-cancel">↩ Cancelar y volver</a>
+        </div>
+    </main>
+
+    <script>
+        const token = sessionStorage.getItem('token');
+        const partesURL = window.location.pathname.split('/').filter(Boolean);
+        const pacienteId = partesURL[partesURL.length - 1];
+
+        const btnEliminar = document.getElementById('btnEliminar');
+        const mensajeEstado = document.getElementById('mensajeEstado');
+        const nombrePaciente = document.getElementById('nombrePaciente');
+        const rutPaciente = document.getElementById('rutPaciente');
+
+        async function cargarInfoEliminar() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok) throw new Error('No se pudo obtener la información.');
+
+                const paciente = await respuesta.json();
+                nombrePaciente.textContent = paciente.nombre;
+                rutPaciente.textContent = `RUT: ${paciente.rut}`;
+
+            } catch (error) {
+                nombrePaciente.textContent = 'Error al cargar';
+                console.error(error);
+            }
+        }
+
+        btnEliminar.addEventListener('click', async function() {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            btnEliminar.disabled = true;
+            mensajeEstado.textContent = 'Eliminando paciente...';
+
+            try {
+                const respuesta = await fetch(`/api/hospital/${pacienteId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    }
+                });
+
+                if (respuesta.status === 401 || respuesta.status === 403) {
+                    sessionStorage.removeItem('token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                if (!respuesta.ok && respuesta.status !== 204) {
+                    throw new Error('No se pudo eliminar el paciente.');
+                }
+
+                mensajeEstado.textContent = 'Paciente eliminado correctamente. Redirigiendo...';
+                mensajeEstado.style.color = '#166534';
+                
+                setTimeout(() => {
+                    window.location.href = '/listar_paciente/';
+                }, 1000);
+
+            } catch (error) {
+                mensajeEstado.textContent = error.message;
+                mensajeEstado.style.color = '#dc2626';
+                btnEliminar.disabled = false;
+                console.error(error);
+            }
+        });
+
+        cargarInfoEliminar();
+    </script>
+</body>
+</html>
